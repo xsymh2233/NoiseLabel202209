@@ -9,8 +9,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import torch.nn.functional as F
 from LeNet5 import *
-import loss1
+import loss1,loss2
 import numpy as np
+
 
 train_batch_size=12
 
@@ -25,17 +26,34 @@ else:
 
 
 # 定义超参数
-noise_fractions=0.1
+asym = True  # 是否使用非对称噪声
+noise_fractions = 0.35   # 噪声比例
 batch_size = 64  # 一次训练的样本数目
 learning_rate = 0.0001  # 学习率
 iteration_num = 50  # 迭代次数
 network = LeNet5()  # 实例化网络
 optimizer = optim.SGD(params=network.parameters(), lr=learning_rate, momentum=0.78)
-bootstarp_beta = 0.95
-# 定义损失函数
-criterion = loss1.Bootstrapping(10, t=1 - bootstarp_beta)
-#criterion=nn.CrossEntropyLoss()
+alpha = 1      # SCE方法的参数alpha
+bootstarp_beta = 0.95    # Bootstarp方法的参数Beta
+loss_model = 'CE'      #确定损失函数类型
+criterion = nn.CrossEntropyLoss()   # 初始化定义损失函数
 
+# 定义损失函数
+def get_criterion(alpha,beta,loss_model):
+    global criterion
+    loss_options = {
+        'SCE': loss2.SCELoss(alpha=alpha, beta=beta, num_classes=10),
+        'CE': torch.nn.CrossEntropyLoss(),
+        'bootstrap_soft': loss2.Bootstrapping(num_classes=10, t= 1 - beta),
+        'bootstrap_hard': loss2.Bootstrapping_Hard(num_classes=10, t=1 - beta)
+    }
+
+    if loss_model in loss_options:
+        criterion = loss_options[loss_model]
+        print(criterion)
+    else:
+        print("Unknown loss")
+    return criterion
 
 def get_data():   # 仅参考用
     """获取数据"""
@@ -58,7 +76,7 @@ def get_data():   # 仅参考用
     # 返回分割好的训练集和测试集
     return train_loader, test_loader
 
-def get_traindata_noise():
+def get_traindata_noise(asym=False):
     """获取数据"""
     train = torchvision.datasets.MNIST(root="./data", train=True, download=True,
                                        transform=torchvision.transforms.Compose([
@@ -70,22 +88,43 @@ def get_traindata_noise():
     for data in train_loading:
         x, y = data
     y_noise = torch.ones(len(y))
-
+    count = 0
     for j in range(len(y)):
         rd = np.random.rand()
         if rd <= 1 - noise_fractions:
             y_noise[j] = y[j]
+
         else:
-            for i in range(10):
-                if 1 - noise_fractions + i * noise_fractions / 10 < rd <= 1 - noise_fractions + (i + 1) * noise_fractions / 10:
-                    y_noise[j] *= i    # 加标签噪声
+            count += 1
+            if asym:
+                if y[j] == y_noise[j] * 2:
+                    noise_value = 7
+                elif y[j] == y_noise[j] * 3:
+                    noise_value = 8
+                elif y[j] == y_noise[j] * 5:
+                    noise_value = 6
+                elif y[j] == y_noise[j] * 6:
+                    noise_value = 5
+                elif y[j] == y_noise[j] * 7:
+                    noise_value = 1
+                else:
+                    noise_value = 1
+
+                y_noise[j] *= noise_value
+            else:
+                for i in range(10):
+                    if 1 - noise_fractions + i * noise_fractions / 10 < rd <= 1 - noise_fractions + (i + 1) * noise_fractions / 10:
+                        y_noise[j] *= i  # 加标签噪声
+
+
+
     # print(y_noise)
     # print(y)
     train_noise = TensorDataset(x, y_noise)    # 装包
     train_noise_loader = DataLoader(train_noise, batch_size=batch_size)  # 分割训练集
     train_loader = DataLoader(train_noise, batch_size=batch_size)  # 分割训练集
     # 返回分割好的训练集
-    return train_noise_loader, train_loader
+    return train_noise_loader, train_loader, count/len(y)
 
 def get_testdata_noise():
     # 获取测试集
@@ -94,23 +133,7 @@ def get_testdata_noise():
                                           torchvision.transforms.ToTensor(),  # 转换成张量
                                           torchvision.transforms.Normalize((0.1307,), (0.3081,))  # 标准化
                                       ]))
-    test_loading = DataLoader(test, batch_size=len(test))  # 分割测试集
 
-    for data in test_loading:
-        x, y = data
-    y_noise = torch.ones(len(y))
-
-    for j in range(len(y)):
-        rd = np.random.rand()
-        if rd <= 1 - noise_fractions:
-            y_noise[j] = y[j]
-        else:
-            for i in range(10):
-                if 1 - noise_fractions + i * noise_fractions < rd <= 1 - noise_fractions + (i + 1) * noise_fractions:
-                    y_noise[j] *= i  # 加标签噪声
-
-    test_noise = TensorDataset(x, y_noise)  # 装包
-    #test_noise_loader = DataLoader(test_noise, batch_size=batch_size)  # 分割测试集
     test_loader = DataLoader(test, batch_size=batch_size)  # 分割测试集
 
     # 返回分割好的测试集
@@ -180,18 +203,19 @@ def test(model, test_loader):
 
 
 def main():
-
+    get_criterion(alpha, bootstarp_beta, loss_model)
     # 获取数据
-    trainND ,trainD = get_traindata_noise()
+    trainND , trainD, acc_noiserate = get_traindata_noise(asym)
     testD = get_testdata_noise()
 
-
-    #迭代
+    # 迭代
     for epoch in range(iteration_num):
         print("\n================ epoch: {} ================".format(epoch))
         train(network, epoch, trainND)
         test(network, testD)
-
+    print('ASYM is',asym)
+    print('LOSS is',loss_model,', α is', alpha, ', β is', bootstarp_beta)
+    print('acc_noiserate is',acc_noiserate)
 
 if __name__ == "__main__":
     main()
