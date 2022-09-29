@@ -1,0 +1,47 @@
+bootstrap_soft
+lr=0.0001,   beta=0.98,  noise=0.3 ,  Epoch=50,       Acc=84.77%, Loss=0.585
+lr=0.0001,   beta=0.95,  noise=0.3 ,  Epoch=50,       Acc=85.37%, Loss=0.650
+lr=0.0001,   beta=0.93,  noise=0.3 ,  Epoch=50,       Acc=82.86%, Loss=0.637
+lr=0.0001,   beta=0.9,  noise=0.3 ,  Epoch=50,       Acc=83.40%, Loss=0.593
+lr=0.0001,   beta=0.85,  noise=0.3 ,  Epoch=50,       Acc=80.48%, Loss=0.667
+lr=0.0001,   beta=0.8,  noise=0.3 ,  Epoch=50,       Acc=80.08%, Loss=0.675
+lr=0.0001,   beta=0.75,  noise=0.3 ,  Epoch=50,       Acc=80.28%, Loss=0.642
+lr=0.0001,   beta=0.7,  noise=0.3 ,  Epoch=50,       Acc=79.36%, Loss=0.592
+
+bootstarp_hard
+lr=0.0001,   beta=0.98,  noise=0.3 ,  Epoch=50,       Acc=79.72%, Loss=2.519
+lr=0.0001,   beta=0.95,  noise=0.3 ,  Epoch=50,       Acc=81.73%, Loss=3.926
+lr=0.0001,   beta=0.93,  noise=0.3 ,  Epoch=50,       Acc=64.92%, Loss=5.110
+lr=0.0001,   beta=0.9,  noise=0.3 ,  Epoch=50,       Acc=73.75%, Loss=5.943
+lr=0.0001,   beta=0.85,  noise=0.3 ,  Epoch=50,       Acc=50.73%, Loss=6.294
+lr=0.0001,   beta=0.8,  noise=0.3 ,  Epoch=50,       Acc=56.17%, Loss=4.017
+lr=0.0001,   beta=0.7,  noise=0.3 ,  Epoch=50,       Acc=42.01%, Loss=5.917
+
+crossentropy
+lr=0.0001,                   noise=0.3 ,  Epoch=50,       Acc=83.58%, Loss=0.631
+
+noise=0.32
+bootstrap_soft
+lr=0.0001,   beta=0.95,  noise=0.5 ,  Epoch=50,       Acc=80.55%, Loss=0.792
+crossentropy
+lr=0.0001,                   noise=0.5 ,  Epoch=50,       Acc=75.88%, Loss=0.805
+
+noise=0.35
+bootstrap_soft
+lr=0.0001,   beta=0.95,  noise=0.5 ,  Epoch=50,       Acc=80.55%, Loss=0.792
+crossentropy
+lr=0.0001,                   noise=0.5 ,  Epoch=50,       Acc=77.77%, Loss=0.758
+
+noise=0.4
+bootstrap_soft
+lr=0.0001,   beta=0.95,  noise=0.5 ,  Epoch=50,       Acc=68.95%, Loss=0.831
+lr=0.001,                   noise=0.5 ,  Epoch=50,       Acc=70.31%, Loss=0.717
+crossentropy
+lr=0.0001,                   noise=0.5 ,  Epoch=50,       Acc=42.15%, Loss=0.610
+lr=0.001,                   noise=0.5 ,  Epoch=50,       Acc=66.79%, Loss=0.699
+
+noise=0.5
+bootstrap_soft
+lr=0.0001,   beta=0.95,  noise=0.5 ,  Epoch=50,       Acc=58.35%, Loss=0.740
+crossentropy
+lr=0.0001,                   noise=0.5 ,  Epoch=50,       Acc=42.15%, Loss=0.610
