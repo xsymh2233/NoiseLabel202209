@@ -25,7 +25,7 @@ else:
 
 
 # 定义超参数
-noise_fractions=0.32
+noise_fractions=0.1
 batch_size = 64  # 一次训练的样本数目
 learning_rate = 0.0001  # 学习率
 iteration_num = 50  # 迭代次数
@@ -77,7 +77,7 @@ def get_traindata_noise():
             y_noise[j] = y[j]
         else:
             for i in range(10):
-                if 1 - noise_fractions + i * noise_fractions < rd <= 1 - noise_fractions + (i + 1) * noise_fractions:
+                if 1 - noise_fractions + i * noise_fractions / 10 < rd <= 1 - noise_fractions + (i + 1) * noise_fractions / 10:
                     y_noise[j] *= i    # 加标签噪声
     # print(y_noise)
     # print(y)
