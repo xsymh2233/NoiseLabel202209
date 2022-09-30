@@ -27,15 +27,15 @@ else:
 
 # 定义超参数
 asym = True  # 是否使用非对称噪声
-noise_fractions = 0.35   # 噪声比例
-batch_size = 64  # 一次训练的样本数目
-learning_rate = 0.0001  # 学习率
-iteration_num = 50  # 迭代次数
+noise_fractions = 0.3   # 噪声比例
+batch_size = 128  # 一次训练的样本数目
+learning_rate = 0.01  # 学习率
+iteration_num = 15  # 迭代次数
 network = LeNet5()  # 实例化网络
-optimizer = optim.SGD(params=network.parameters(), lr=learning_rate, momentum=0.78)
+optimizer = optim.SGD(params=network.parameters(), lr=learning_rate, momentum=0.9, weight_decay=0.0001)
 alpha = 1      # SCE方法的参数alpha
 bootstarp_beta = 0.95    # Bootstarp方法的参数Beta
-loss_model = 'CE'      #确定损失函数类型
+loss_model = 'bootstrap_soft'      #确定损失函数类型
 criterion = nn.CrossEntropyLoss()   # 初始化定义损失函数
 
 # 定义损失函数
@@ -200,6 +200,7 @@ def test(model, test_loader):
 
     # 输出准确
     print("Test Accuracy: {}%".format(accuracy))
+    return accuracy
 
 
 def main():
@@ -207,15 +208,19 @@ def main():
     # 获取数据
     trainND , trainD, acc_noiserate = get_traindata_noise(asym)
     testD = get_testdata_noise()
-
+    best_acc = 0
+    best_epoch = 0   # 最优精准率及对应epoch
     # 迭代
     for epoch in range(iteration_num):
         print("\n================ epoch: {} ================".format(epoch))
         train(network, epoch, trainND)
-        test(network, testD)
-    print('ASYM is',asym)
-    print('LOSS is',loss_model,', α is', alpha, ', β is', bootstarp_beta)
-    print('acc_noiserate is',acc_noiserate)
+        acc=test(network, testD)
+        if acc > best_acc:
+            best_acc = acc
+            best_epoch = epoch
+    print('ASYM is', asym)
+    print('LOSS is', loss_model, ', α is', alpha, ', β is', bootstarp_beta)
+    print('acc_noiserate is', acc_noiserate, ', Best_acc is', best_acc, 'Best_epoch is', best_epoch)
 
 if __name__ == "__main__":
     main()
